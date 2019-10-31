@@ -38,6 +38,50 @@
 /obj/item/vending_refill/wardrobe/sec_wardrobe
 	machine_name = "SecDrobe"
 
+
+/obj/machinery/vending/wardrobe/head_wardrobe
+	name = "\improper HeadDrobe"
+	desc = "A vending machine that dispenses clothes for heads of staff"
+	icon_state = "bardrobe"
+	product_ads = "Get clothing for your head here!"
+	vend_reply = "Thank you for using the HeadDrobe!"
+	products = list(/obj/item/clothing/under/rank/engineering/chief_engineer = 1,
+					/obj/item/clothing/under/rank/engineering/chief_engineer/skirt = 1,
+					/obj/item/clothing/head/hardhat/white = 1,
+					/obj/item/clothing/suit/toggle/labcoat/cmo = 1,
+					/obj/item/clothing/under/rank/medical/chief_medical_officer = 1,
+					/obj/item/clothing/under/rank/medical/chief_medical_officer/skirt = 1,
+					/obj/item/clothing/under/rank/rnd/research_director = 1,
+					/obj/item/clothing/under/rank/rnd/research_director/skirt = 1,
+					/obj/item/clothing/under/rank/rnd/research_director/alt = 1,
+					/obj/item/clothing/under/rank/rnd/research_director/alt/skirt = 1,
+					/obj/item/clothing/under/rank/rnd/research_director/turtleneck = 1,
+					/obj/item/clothing/under/rank/rnd/research_director/turtleneck/skirt = 1,
+					/obj/item/clothing/under/rank/captain = 1,
+					/obj/item/clothing/under/rank/captain/skirt = 1,
+					/obj/item/clothing/under/rank/captain/parade = 1,
+					/obj/item/clothing/suit/captunic = 1,
+					/obj/item/clothing/under/rank/civilian/head_of_personnel = 1,
+					/obj/item/clothing/under/rank/civilian/head_of_personnel/skirt = 1,
+					/obj/item/clothing/under/rank/security/head_of_security/skirt = 1,
+					/obj/item/clothing/under/rank/security/head_of_security/alt = 1,
+					/obj/item/clothing/under/rank/security/head_of_security/alt/skirt = 1,
+					/obj/item/clothing/under/rank/security/head_of_security/grey = 1,)
+	contraband = list(/obj/item/clothing/cloak/neck/cloak/ce = 1,
+						/obj/item/clothing/cloak/neck/cloak/rd = 1,
+						/obj/item/clothing/cloak/neck/cloak/cap = 1,
+						/obj/item/clothing/cloak/neck/cloak/hop = 1,
+						/obj/item/clothing/cloak/neck/cloak/hos = 1,
+						/obj/item/clothing/cloak/neck/cloak/cmo = 1,
+						/obj/item/clothing/cloak/neck/cloak/qm = 1)
+	refill_canister = /obj/item/vending_refill/wardrobe/head_wardrobe
+	payment_department = ACCOUNT_CIV
+
+/obj/item/vending_refill/wardrobe/head_wardrobe
+machine_name = "HeadDrobe"
+
+
+
 /obj/machinery/vending/wardrobe/medi_wardrobe
 	name = "\improper MediDrobe"
 	desc = "A vending machine rumoured to be capable of dispensing clothing for medical personnel."
