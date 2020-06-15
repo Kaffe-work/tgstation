@@ -13,6 +13,7 @@
 /datum/status_effect/crusher_damage //tracks the damage dealt to this mob by kinetic crushers
 	id = "crusher_damage"
 	duration = -1
+	tick_interval = -1
 	status_type = STATUS_EFFECT_UNIQUE
 	alert_type = null
 	var/total_damage = 0
@@ -64,12 +65,11 @@
 	. = ..()
 	if(.)
 		date = love_interest
-	linked_alert.desc = "You're in love with [date.real_name]! How lovely."
+		linked_alert.desc = "You're in love with [date.real_name]! How lovely."
 
 /datum/status_effect/in_love/tick()
 	if(date)
-		new /obj/effect/temp_visual/love_heart/invisible(get_turf(date.loc), owner)
-
+		new /obj/effect/temp_visual/love_heart/invisible(date.drop_location(), owner)
 
 /datum/status_effect/throat_soothed
 	id = "throat_soothed"
@@ -143,3 +143,29 @@
 	. = ..()
 	if(.)
 		listening_in = tracker
+
+// heldup is for the person being aimed at
+/datum/status_effect/heldup
+	id = "heldup"
+	duration = -1
+	tick_interval = -1
+	status_type = STATUS_EFFECT_MULTIPLE
+	alert_type = /obj/screen/alert/status_effect/heldup
+
+/obj/screen/alert/status_effect/heldup
+	name = "Held Up"
+	desc = "Making any sudden moves would probably be a bad idea!"
+	icon_state = "aimed"
+
+// holdup is for the person aiming
+/datum/status_effect/holdup
+	id = "holdup"
+	duration = -1
+	tick_interval = -1
+	status_type = STATUS_EFFECT_UNIQUE
+	alert_type = /obj/screen/alert/status_effect/holdup
+
+/obj/screen/alert/status_effect/holdup
+	name = "Holding Up"
+	desc = "You're currently pointing a gun at someone."
+	icon_state = "aimed"

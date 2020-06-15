@@ -79,7 +79,6 @@
 	if (isturf(loc))
 		myarea = get_area(src)
 		LAZYADD(myarea.cameras, src)
-	proximity_monitor = new(src, 1)
 
 	if(mapload && is_station_level(z) && prob(3) && !start_active)
 		toggle_cam()
@@ -90,6 +89,14 @@
 	for(var/i in network)
 		network -= i
 		network += "[idnum][i]"
+
+/obj/machinery/proc/create_prox_monitor()
+	if(!proximity_monitor)
+		proximity_monitor = new(src, 1)
+
+/obj/machinery/camera/proc/set_area_motion(area/A)
+	area_motion = A
+	create_prox_monitor()
 
 /obj/machinery/camera/Destroy()
 	if(can_use())
@@ -140,7 +147,7 @@
 			update_icon()
 			network = list()
 			GLOB.cameranet.removeCamera(src)
-			stat |= EMPED
+			machine_stat |= EMPED
 			set_light(0)
 			emped = emped+1  //Increase the number of consecutive EMP's
 			update_icon()
@@ -159,7 +166,7 @@
 	if(emped != thisemp) //Only fix it if the camera hasn't been EMP'd again
 		return
 	network = previous_network
-	stat &= ~EMPED
+	machine_stat &= ~EMPED
 	update_icon()
 	if(can_use())
 		GLOB.cameranet.addCamera(src)
@@ -195,12 +202,42 @@
 	update_icon()
 	return TRUE
 
+/obj/machinery/camera/crowbar_act(mob/living/user, obj/item/I)
+	. = ..()
+	if(!panel_open)
+		return
+	var/list/droppable_parts = list()
+	if(assembly.xray_module)
+		droppable_parts += assembly.xray_module
+	if(assembly.emp_module)
+		droppable_parts += assembly.emp_module
+	if(assembly.proxy_module)
+		droppable_parts += assembly.proxy_module
+	if(!droppable_parts.len)
+		return
+	var/obj/item/choice = input(user, "Select a part to remove:", src) as null|obj in sortNames(droppable_parts)
+	if(!choice || !user.canUseTopic(src, BE_CLOSE, FALSE, NO_TK))
+		return
+	to_chat(user, "<span class='notice'>You remove [choice] from [src].</span>")
+	if(choice == assembly.xray_module)
+		assembly.drop_upgrade(assembly.xray_module)
+		removeXRay()
+	if(choice == assembly.emp_module)
+		assembly.drop_upgrade(assembly.emp_module)
+		removeEmpProof()
+	if(choice == assembly.proxy_module)
+		assembly.drop_upgrade(assembly.proxy_module)
+		removeMotion()
+	I.play_tool_sound(src)
+	return TRUE
+
 /obj/machinery/camera/wirecutter_act(mob/living/user, obj/item/I)
 	. = ..()
 	if(!panel_open)
 		return
 	toggle_cam(user, 1)
 	obj_integrity = max_integrity //this is a pretty simplistic way to heal the camera, but there's no reason for this to be complex.
+	machine_stat &= ~BROKEN
 	I.play_tool_sound(src)
 	return TRUE
 
@@ -319,7 +356,7 @@
 
 
 /obj/machinery/camera/run_obj_armor(damage_amount, damage_type, damage_flag = 0, attack_dir)
-	if(stat & BROKEN)
+	if(machine_stat & BROKEN)
 		return damage_amount
 	. = ..()
 
@@ -352,7 +389,7 @@
 		xray_module = "xray"
 	if(!status)
 		icon_state = "[xray_module][default_camera_icon]_off"
-	else if (stat & EMPED)
+	else if (machine_stat & EMPED)
 		icon_state = "[xray_module][default_camera_icon]_emp"
 	else
 		icon_state = "[xray_module][default_camera_icon][in_use_lights ? "_in_use" : ""]"
@@ -376,7 +413,8 @@
 	if(status)
 		change_msg = "reactivates"
 		triggerCameraAlarm()
-		addtimer(CALLBACK(src, .proc/cancelCameraAlarm), 100)
+		if(!QDELETED(src)) //We'll be doing it anyway in destroy
+			addtimer(CALLBACK(src, .proc/cancelCameraAlarm), 100)
 	if(displaymessage)
 		if(user)
 			visible_message("<span class='danger'>[user] [change_msg] [src]!</span>")
@@ -409,7 +447,7 @@
 /obj/machinery/camera/proc/can_use()
 	if(!status)
 		return FALSE
-	if(stat & EMPED)
+	if(machine_stat & EMPED)
 		return FALSE
 	return TRUE
 
@@ -421,32 +459,6 @@
 	else
 		see = get_hear(view_range, pos)
 	return see
-
-/atom/proc/auto_turn()
-	//Automatically turns based on nearby walls.
-	var/turf/closed/wall/T = null
-	for(var/i in GLOB.cardinals)
-		T = get_ranged_target_turf(src, i, 1)
-		if(istype(T))
-			setDir(turn(i, 180))
-			break
-
-//Return a working camera that can see a given mob
-//or null if none
-/proc/seen_by_camera(var/mob/M)
-	for(var/obj/machinery/camera/C in oview(4, M))
-		if(C.can_use())	// check if camera disabled
-			return C
-			break
-	return null
-
-/proc/near_range_camera(var/mob/M)
-	for(var/obj/machinery/camera/C in range(4, M))
-		if(C.can_use())	// check if camera disabled
-			return C
-			break
-
-	return null
 
 /obj/machinery/camera/proc/Togglelight(on=0)
 	for(var/mob/living/silicon/ai/A in GLOB.ai_list)

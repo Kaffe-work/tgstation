@@ -59,7 +59,7 @@
 	..()
 
 /datum/brain_trauma/severe/split_personality/proc/switch_personalities()
-	if(QDELETED(owner) || owner.stat == DEAD || QDELETED(stranger_backseat) || QDELETED(owner_backseat))
+	if(QDELETED(owner) || QDELETED(stranger_backseat) || QDELETED(owner_backseat))
 		return
 
 	var/mob/living/split_personality/current_backseat
@@ -144,7 +144,9 @@
 	..()
 
 /mob/living/split_personality/Login()
-	..()
+	. = ..()
+	if(!. || !client)
+		return FALSE
 	to_chat(src, "<span class='notice'>As a split personality, you cannot do anything but observe. However, you will eventually gain control of your body, switching places with the current personality.</span>")
 	to_chat(src, "<span class='warning'><b>Do not commit suicide or put the body in a deadly position. Behave like you care about it as much as the owner.</b></span>")
 
@@ -153,7 +155,7 @@
 	return FALSE
 
 /mob/living/split_personality/emote(act, m_type = null, message = null, intentional = FALSE)
-	return
+	return FALSE
 
 ///////////////BRAINWASHING////////////////////
 
@@ -204,9 +206,9 @@
 /datum/brain_trauma/severe/split_personality/brainwashing/handle_hearing(datum/source, list/hearing_args)
 	if(HAS_TRAIT(owner, TRAIT_DEAF) || owner == hearing_args[HEARING_SPEAKER])
 		return
-	var/message = hearing_args[HEARING_MESSAGE]
+	var/message = hearing_args[HEARING_RAW_MESSAGE]
 	if(findtext(message, codeword))
-		hearing_args[HEARING_MESSAGE] = replacetext(message, codeword, "<span class='warning'>[codeword]</span>")
+		hearing_args[HEARING_RAW_MESSAGE] = replacetext(message, codeword, "<span class='warning'>[codeword]</span>")
 		addtimer(CALLBACK(src, /datum/brain_trauma/severe/split_personality.proc/switch_personalities), 10)
 
 /datum/brain_trauma/severe/split_personality/brainwashing/handle_speech(datum/source, list/speech_args)
@@ -220,7 +222,9 @@
 	var/codeword
 
 /mob/living/split_personality/traitor/Login()
-	..()
+	. = ..()
+	if(!. || !client)
+		return FALSE
 	to_chat(src, "<span class='notice'>As a brainwashed personality, you cannot do anything yet but observe. However, you may gain control of your body if you hear the special codeword, switching places with the current personality.</span>")
 	to_chat(src, "<span class='notice'>Your activation codeword is: <b>[codeword]</b></span>")
 	if(objective)

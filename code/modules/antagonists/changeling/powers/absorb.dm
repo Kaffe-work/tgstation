@@ -59,10 +59,10 @@
 	if(user.nutrition < NUTRITION_LEVEL_WELL_FED)
 		user.set_nutrition(min((user.nutrition + target.nutrition), NUTRITION_LEVEL_WELL_FED))
 
-	if(target.mind && user.mind)//if the victim and user have minds
-		// Absorb a lizard, speak Draconic.
-		user.copy_known_languages_from(target)
+	// Absorb a lizard, speak Draconic.
+	owner.copy_languages(target, LANGUAGE_ABSORB)
 
+	if(target.mind && user.mind)//if the victim and user have minds
 		var/datum/mind/suckedbrain = target.mind
 		user.mind.memory += "<BR><b>We've absorbed [target]'s memories into our own...</b><BR>[suckedbrain.memory]<BR>"
 		for(var/A in suckedbrain.antag_datums)
@@ -123,9 +123,11 @@
 			to_chat(user, "<span class='boldnotice'>[target] was one of us. We have absorbed their power.</span>")
 			target_ling.remove_changeling_powers()
 			changeling.geneticpoints += round(target_ling.geneticpoints/2)
+			changeling.total_geneticspoints = changeling.geneticpoints //updates the total sum of genetic points when you absorb another ling
 			target_ling.geneticpoints = 0
 			target_ling.canrespec = 0
 			changeling.chem_storage += round(target_ling.chem_storage/2)
+			changeling.total_chem_storage = changeling.chem_storage //updates the total sum of chemicals stored for when you absorb another ling
 			changeling.chem_charges += min(target_ling.chem_charges, changeling.chem_storage)
 			target_ling.chem_charges = 0
 			target_ling.chem_storage = 0

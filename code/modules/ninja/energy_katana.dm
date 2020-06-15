@@ -2,7 +2,8 @@
 	name = "energy katana"
 	desc = "A katana infused with strong energy."
 	icon_state = "energy_katana"
-	item_state = "energy_katana"
+	inhand_icon_state = "energy_katana"
+	worn_icon_state = "energy_katana"
 	lefthand_file = 'icons/mob/inhands/weapons/swords_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/weapons/swords_righthand.dmi'
 	force = 40
@@ -79,7 +80,7 @@
 
 	if(user.put_in_hands(src))
 		msg = "Your Energy Katana teleports into your hand!"
-	else if(user.equip_to_slot_if_possible(src, SLOT_BELT, 0, 1, 1))
+	else if(user.equip_to_slot_if_possible(src, ITEM_SLOT_BELT, 0, 1, 1))
 		msg = "Your Energy Katana teleports back to you, sheathing itself as it does so!</span>"
 	else
 		msg = "Your Energy Katana teleports to your location!"

@@ -22,12 +22,14 @@
 	response_disarm_simple = "gently push aside"
 	maxHealth = 60
 	health = 60
-	spacewalk = TRUE
-	var/armored = FALSE
+	speed = 0
 
 	obj_damage = 60
-	melee_damage_lower = 20
-	melee_damage_upper = 30
+	melee_damage_lower = 15 // i know it's like half what it used to be, but bears cause bleeding like crazy now so it works out
+	melee_damage_upper = 15
+	wound_bonus = -5
+	bare_wound_bonus = 10 // BEAR wound bonus am i right
+	sharpness = TRUE
 	attack_verb_continuous = "claws"
 	attack_verb_simple = "claw"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -40,9 +42,35 @@
 	maxbodytemp = 1500
 
 	faction = list("russian")
-	gold_core_spawnable = HOSTILE_SPAWN
 
 	footstep_type = FOOTSTEP_MOB_CLAW
+
+	var/armored = FALSE
+	var/rideable = FALSE
+
+/mob/living/simple_animal/hostile/bear/Initialize()
+	. = ..()
+	ADD_TRAIT(src, TRAIT_SPACEWALK, INNATE_TRAIT)
+
+/mob/living/simple_animal/hostile/bear/Life()
+	. = ..()
+	if(!rideable && mind)
+		can_buckle = TRUE
+		buckle_lying = FALSE
+		var/datum/component/riding/D = LoadComponent(/datum/component/riding)
+		D.set_riding_offsets(RIDING_OFFSET_ALL, list(TEXT_NORTH = list(1, 8), TEXT_SOUTH = list(1, 8), TEXT_EAST = list(-3, 6), TEXT_WEST = list(3, 6)))
+		D.set_vehicle_dir_layer(SOUTH, ABOVE_MOB_LAYER)
+		D.set_vehicle_dir_layer(NORTH, OBJ_LAYER)
+		D.set_vehicle_dir_layer(EAST, ABOVE_MOB_LAYER)
+		D.set_vehicle_dir_layer(WEST, ABOVE_MOB_LAYER)
+		rideable = TRUE
+
+/mob/living/simple_animal/hostile/bear/update_icons()
+	..()
+	if(armored)
+		add_overlay("armor_bear")
+
+
 
 //SPACE BEARS! SQUEEEEEEEE~     OW! FUCK! IT BIT MY HAND OFF!!
 /mob/living/simple_animal/hostile/bear/Hudson
@@ -66,17 +94,14 @@
 	icon_dead = "combatbear_dead"
 	faction = list("russian")
 	butcher_results = list(/obj/item/reagent_containers/food/snacks/meat/slab/bear = 5, /obj/item/clothing/head/bearpelt = 1, /obj/item/bear_armor = 1)
-	melee_damage_lower = 25
-	melee_damage_upper = 35
+	melee_damage_lower = 18
+	melee_damage_upper = 20
+	wound_bonus = 0
 	armour_penetration = 20
 	health = 120
 	maxHealth = 120
 	armored = TRUE
-
-/mob/living/simple_animal/hostile/bear/update_icons()
-	..()
-	if(armored)
-		add_overlay("armor_bear")
+	gold_core_spawnable = HOSTILE_SPAWN
 
 /obj/item/bear_armor
 	name = "pile of bear armor"
@@ -96,8 +121,9 @@
 		A.maxHealth += 60
 		A.health += 60
 		A.armour_penetration += 20
-		A.melee_damage_lower += 5
+		A.melee_damage_lower += 3
 		A.melee_damage_upper += 5
+		A.wound_bonus += 5
 		A.update_icons()
 		to_chat(user, "<span class='info'>You strap the armor plating to [A] and sharpen [A.p_their()] claws with the nail filer. This was a great idea.</span>")
 		qdel(src)

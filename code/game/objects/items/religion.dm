@@ -3,7 +3,7 @@
 	desc = "A banner with Nanotrasen's logo on it."
 	icon = 'icons/obj/banner.dmi'
 	icon_state = "banner"
-	item_state = "banner"
+	inhand_icon_state = "banner"
 	force = 8
 	attack_verb = list("forcefully inspired", "violently encouraged", "relentlessly galvanized")
 	lefthand_file = 'icons/mob/inhands/equipment/banners_lefthand.dmi'
@@ -44,9 +44,9 @@
 		if(H.stat == DEAD || H == user)
 			continue
 		if(H.mind && (has_job_loyalties || has_role_loyalties))
-			if(has_job_loyalties && H.mind.assigned_role in job_loyalties)
+			if(has_job_loyalties && (H.mind.assigned_role in job_loyalties))
 				inspired += H
-			else if(has_role_loyalties && H.mind.special_role in role_loyalties)
+			else if(has_role_loyalties && (H.mind.special_role in role_loyalties))
 				inspired += H
 		else if(check_inspiration(H))
 			inspired += H
@@ -78,7 +78,7 @@
 	name = "securistan banner"
 	desc = "The banner of Securistan, ruling the station with an iron fist."
 	icon_state = "banner_security"
-	item_state = "banner_security"
+	inhand_icon_state = "banner_security"
 	lefthand_file = 'icons/mob/inhands/equipment/banners_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/banners_righthand.dmi'
 	job_loyalties = list("Security Officer", "Warden", "Detective", "Head of Security")
@@ -99,10 +99,10 @@
 	name = "meditopia banner"
 	desc = "The banner of Meditopia, generous benefactors that cure wounds and shelter the weak."
 	icon_state = "banner_medical"
-	item_state = "banner_medical"
+	inhand_icon_state = "banner_medical"
 	lefthand_file = 'icons/mob/inhands/equipment/banners_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/banners_righthand.dmi'
-	job_loyalties = list("Medical Doctor", "Chemist", "Geneticist", "Virologist", "Chief Medical Officer")
+	job_loyalties = list("Medical Doctor", "Chemist", "Virologist", "Chief Medical Officer")
 	warcry = "No wounds cannot be healed!"
 
 /obj/item/banner/medical/mundane
@@ -128,10 +128,10 @@
 	name = "sciencia banner"
 	desc = "The banner of Sciencia, bold and daring thaumaturges and researchers that take the path less traveled."
 	icon_state = "banner_science"
-	item_state = "banner_science"
+	inhand_icon_state = "banner_science"
 	lefthand_file = 'icons/mob/inhands/equipment/banners_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/banners_righthand.dmi'
-	job_loyalties = list("Scientist", "Roboticist", "Research Director")
+	job_loyalties = list("Scientist", "Roboticist", "Research Director", "Geneticist",)
 	warcry = "For Cuban Pete!"
 
 /obj/item/banner/science/mundane
@@ -152,7 +152,7 @@
 	name = "cargonia banner"
 	desc = "The banner of the eternal Cargonia, with the mystical power of conjuring any object into existence."
 	icon_state = "banner_cargo"
-	item_state = "banner_cargo"
+	inhand_icon_state = "banner_cargo"
 	lefthand_file = 'icons/mob/inhands/equipment/banners_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/banners_righthand.dmi'
 	job_loyalties = list("Cargo Technician", "Shaft Miner", "Quartermaster")
@@ -173,7 +173,7 @@
 	name = "engitopia banner"
 	desc = "The banner of Engitopia, wielders of limitless power."
 	icon_state = "banner_engineering"
-	item_state = "banner_engineering"
+	inhand_icon_state = "banner_engineering"
 	lefthand_file = 'icons/mob/inhands/equipment/banners_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/banners_righthand.dmi'
 	job_loyalties = list("Station Engineer", "Atmospheric Technician", "Chief Engineer")
@@ -217,17 +217,17 @@
 /obj/item/banner/red
 	name = "red banner"
 	icon_state = "banner-red"
-	item_state = "banner-red"
+	inhand_icon_state = "banner-red"
 	desc = "A banner with the logo of the red deity."
 
 /obj/item/banner/blue
 	name = "blue banner"
 	icon_state = "banner-blue"
-	item_state = "banner-blue"
+	inhand_icon_state = "banner-blue"
 	desc = "A banner with the logo of the blue deity."
 
 /obj/item/storage/backpack/bannerpack
-	name = "nanotrasen banner backpack"
+	name = "\improper Nanotrasen banner backpack"
 	desc = "It's a backpack with lots of extra room.  A banner with Nanotrasen's logo is attached, that can't be removed."
 	icon_state = "bannerpack"
 
@@ -254,7 +254,7 @@
 	w_class = WEIGHT_CLASS_BULKY
 	slowdown = 2.0 //gotta pretend we're balanced.
 	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
-	armor = list("melee" = 50, "bullet" = 50, "laser" = 50, "energy" = 40, "bomb" = 60, "bio" = 0, "rad" = 0, "fire" = 60, "acid" = 60)
+	armor = list("melee" = 50, "bullet" = 50, "laser" = 50, "energy" = 50, "bomb" = 60, "bio" = 0, "rad" = 0, "fire" = 60, "acid" = 60)
 
 /obj/item/clothing/suit/armor/plate/crusader/red
 	icon_state = "crusader-red"
@@ -268,7 +268,7 @@
 	icon_state = "crusader"
 	w_class = WEIGHT_CLASS_NORMAL
 	flags_inv = HIDEHAIR|HIDEEARS|HIDEFACE
-	armor = list("melee" = 50, "bullet" = 50, "laser" = 50, "energy" = 40, "bomb" = 60, "bio" = 0, "rad" = 0, "fire" = 60, "acid" = 60)
+	armor = list("melee" = 50, "bullet" = 50, "laser" = 50, "energy" = 50, "bomb" = 60, "bio" = 0, "rad" = 0, "fire" = 60, "acid" = 60)
 
 /obj/item/clothing/head/helmet/plate/crusader/blue
 	icon_state = "crusader-blue"
@@ -280,9 +280,9 @@
 /obj/item/clothing/head/helmet/plate/crusader/prophet
 	name = "Prophet's Hat"
 	desc = "A religious-looking hat."
-	mob_overlay_icon = 'icons/mob/large-worn-icons/64x64/head.dmi'
+	worn_icon = 'icons/mob/large-worn-icons/64x64/head.dmi'
 	flags_1 = 0
-	armor = list("melee" = 60, "bullet" = 60, "laser" = 60, "energy" = 50, "bomb" = 70, "bio" = 50, "rad" = 50, "fire" = 60, "acid" = 60) //religion protects you from disease and radiation, honk.
+	armor = list("melee" = 60, "bullet" = 60, "laser" = 60, "energy" = 60, "bomb" = 70, "bio" = 50, "rad" = 50, "fire" = 60, "acid" = 60) //religion protects you from disease and radiation, honk.
 	worn_x_dimension = 64
 	worn_y_dimension = 64
 
@@ -342,7 +342,7 @@
 	desc = "Metal boots, they look heavy."
 	icon_state = "crusader"
 	w_class = WEIGHT_CLASS_NORMAL
-	armor = list("melee" = 50, "bullet" = 50, "laser" = 50, "energy" = 40, "bomb" = 60, "bio" = 0, "rad" = 0, "fire" = 60, "acid" = 60) //does this even do anything on boots?
+	armor = list("melee" = 50, "bullet" = 50, "laser" = 50, "energy" = 50, "bomb" = 60, "bio" = 0, "rad" = 0, "fire" = 60, "acid" = 60) //does this even do anything on boots?
 	clothing_flags = NOSLIP
 	cold_protection = FEET
 	min_cold_protection_temperature = SHOES_MIN_TEMP_PROTECT

@@ -14,7 +14,7 @@
 	name = "bio suit"
 	desc = "A suit that protects against biological contamination."
 	icon_state = "bio"
-	item_state = "bio_suit"
+	inhand_icon_state = "bio_suit"
 	w_class = WEIGHT_CLASS_BULKY
 	gas_transfer_coefficient = 0.01
 	permeability_coefficient = 0.01
@@ -46,11 +46,11 @@
 
 //Security biosuit, grey with red stripe across the chest
 /obj/item/clothing/head/bio_hood/security
-	armor = list("melee" = 25, "bullet" = 15, "laser" = 25, "energy" = 10, "bomb" = 25, "bio" = 100, "rad" = 80, "fire" = 30, "acid" = 100)
+	armor = list("melee" = 25, "bullet" = 15, "laser" = 25, "energy" = 35, "bomb" = 25, "bio" = 100, "rad" = 80, "fire" = 30, "acid" = 100)
 	icon_state = "bio_security"
-	
+
 /obj/item/clothing/suit/bio_suit/security
-	armor = list("melee" = 25, "bullet" = 15, "laser" = 25, "energy" = 10, "bomb" = 25, "bio" = 100, "rad" = 80, "fire" = 30, "acid" = 100)
+	armor = list("melee" = 25, "bullet" = 15, "laser" = 25, "energy" = 35, "bomb" = 25, "bio" = 100, "rad" = 80, "fire" = 30, "acid" = 100)
 	icon_state = "bio_security"
 
 /obj/item/clothing/suit/bio_suit/security/Initialize()
@@ -91,7 +91,7 @@
 	name = "plague doctor suit"
 	desc = "It protected doctors from the Black Death, back then. You bet your arse it's gonna help you against viruses."
 	icon_state = "plaguedoctor"
-	item_state = "bio_suit"
+	inhand_icon_state = "bio_suit"
 	strip_delay = 40
 	equip_delay_other = 20
 

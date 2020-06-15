@@ -36,6 +36,14 @@ require only minor tweaks.
 #define ZTRAIT_AWAY "Away Mission"
 #define ZTRAIT_SPACE_RUINS "Space Ruins"
 #define ZTRAIT_LAVA_RUINS "Lava Ruins"
+#define ZTRAIT_ICE_RUINS "Ice Ruins"
+#define ZTRAIT_ICE_RUINS_UNDERGROUND "Ice Ruins Underground"
+#define ZTRAIT_ISOLATED_RUINS "Isolated Ruins" //Placing ruins on z levels with this trait will use turf reservation instead of usual placement.
+
+// boolean - weather types that occur on the level
+#define ZTRAIT_SNOWSTORM "Weather_Snowstorm"
+#define ZTRAIT_ASHSTORM "Weather_Ashstorm"
+#define ZTRAIT_ACIDRAIN "Weather_Acidrain"
 
 // number - bombcap is multiplied by this before being applied to bombs
 #define ZTRAIT_BOMBCAP_MULTIPLIER "Bombcap Multiplier"
@@ -65,6 +73,7 @@ require only minor tweaks.
 #define ZTRAITS_SPACE list(ZTRAIT_LINKAGE = CROSSLINKED, ZTRAIT_SPACE_RUINS = TRUE)
 #define ZTRAITS_LAVALAND list(\
     ZTRAIT_MINING = TRUE, \
+    ZTRAIT_ASHSTORM = TRUE, \
     ZTRAIT_LAVA_RUINS = TRUE, \
     ZTRAIT_BOMBCAP_MULTIPLIER = 2, \
     ZTRAIT_BASETURF = /turf/open/lava/smooth/lava_land_surface)
@@ -91,6 +100,8 @@ require only minor tweaks.
 #define PLACEMENT_TRIES 100 //How many times we try to fit the ruin somewhere until giving up (really should just swap to some packing algo)
 
 #define PLACE_DEFAULT "random"
-#define PLACE_SAME_Z "same"
-#define PLACE_SPACE_RUIN "space"
-#define PLACE_LAVA_RUIN "lavaland"
+#define PLACE_SAME_Z "same" //On same z level as original ruin
+#define PLACE_SPACE_RUIN "space" //On space ruin z level(s)
+#define PLACE_LAVA_RUIN "lavaland" //On lavaland ruin z levels(s)
+#define PLACE_BELOW "below" //On z levl below - centered on same tile
+#define PLACE_ISOLATED "isolated" //On isolated ruin z level

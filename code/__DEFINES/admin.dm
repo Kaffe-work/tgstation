@@ -48,6 +48,7 @@
 #define ADMIN_VV(atom) "(<a href='?_src_=vars;[HrefToken(TRUE)];Vars=[REF(atom)]'>VV</a>)"
 #define ADMIN_SM(user) "(<a href='?_src_=holder;[HrefToken(TRUE)];subtlemessage=[REF(user)]'>SM</a>)"
 #define ADMIN_TP(user) "(<a href='?_src_=holder;[HrefToken(TRUE)];traitor=[REF(user)]'>TP</a>)"
+#define ADMIN_SP(user) "(<a href='?_src_=holder;[HrefToken(TRUE)];skill=[REF(user)]'>SP</a>)"
 #define ADMIN_KICK(user) "(<a href='?_src_=holder;[HrefToken(TRUE)];boot2=[REF(user)]'>KICK</a>)"
 #define ADMIN_CENTCOM_REPLY(user) "(<a href='?_src_=holder;[HrefToken(TRUE)];CentComReply=[REF(user)]'>RPLY</a>)"
 #define ADMIN_SYNDICATE_REPLY(user) "(<a href='?_src_=holder;[HrefToken(TRUE)];SyndicateReply=[REF(user)]'>RPLY</a>)"
@@ -74,6 +75,13 @@
 #define ADMIN_PUNISHMENT_SUPPLYPOD_QUICK "Supply Pod (Quick)"
 #define ADMIN_PUNISHMENT_SUPPLYPOD "Supply Pod"
 #define ADMIN_PUNISHMENT_MAZING "Puzzle"
+#define ADMIN_PUNISHMENT_IMMERSE "Fully Immerse"
+#define ADMIN_PUNISHMENT_FAT "Fatten up"
+#define ADMIN_PUNISHMENT_FAKEBWOINK "Fake bwoink"
+#define ADMIN_PUNISHMENT_NUGGET "Nugget"
+#define ADMIN_PUNISHMENT_CRACK ":B:oneless"
+#define ADMIN_PUNISHMENT_BLEED ":B:loodless"
+#define ADMIN_PUNISHMENT_SCARIFY "Scarify"
 
 #define AHELP_ACTIVE 1
 #define AHELP_CLOSED 2
@@ -89,6 +97,10 @@
 
 ///Max length of a keypress command before it's considered to be a forged packet/bogus command
 #define MAX_KEYPRESS_COMMANDLENGTH 16
+///Maximum keys that can be bound to one button
+#define MAX_COMMANDS_PER_KEY 5
+///Maximum keys per keybind
+#define MAX_KEYS_PER_KEYBIND 3
 ///Max amount of keypress messages per second over two seconds before client is autokicked
 #define MAX_KEYPRESS_AUTOKICK 50
 ///Length of held key rolling buffer
@@ -105,3 +117,7 @@
 
 //How many things you can spawn at once with spawn verb/create panel
 #define ADMIN_SPAWN_CAP 100
+
+// LOG BROWSE TYPES
+#define BROWSE_ROOT_ALL_LOGS 1
+#define BROWSE_ROOT_CURRENT_LOGS 2

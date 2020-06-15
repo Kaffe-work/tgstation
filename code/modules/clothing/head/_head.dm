@@ -2,7 +2,7 @@
 	name = BODY_ZONE_HEAD
 	icon = 'icons/obj/clothing/hats.dmi'
 	icon_state = "top_hat"
-	item_state = "that"
+	inhand_icon_state = "that"
 	body_parts_covered = HEAD
 	slot_flags = ITEM_SLOT_HEAD
 	var/blockTracking = 0 //For AI tracking
@@ -45,7 +45,7 @@
 			///if the hat manages to knock something off
 			if(H.dropItemToGround(WH))
 				H.visible_message("<span class='warning'>[src] knocks [WH] off [H]'s head!</span>", "<span class='warning'>[WH] is suddenly knocked off your head by [src]!</span>")
-		if(H.equip_to_slot_if_possible(src, SLOT_HEAD, 0, 1, 1))
+		if(H.equip_to_slot_if_possible(src, ITEM_SLOT_HEAD, 0, 1, 1))
 			H.visible_message("<span class='notice'>[src] lands neatly on [H]'s head!</span>", "<span class='notice'>[src] lands perfectly onto your head!</span>")
 		return
 	if(iscyborg(hit_atom))
@@ -69,7 +69,7 @@
 		if(HAS_BLOOD_DNA(src))
 			. += mutable_appearance('icons/effects/blood.dmi', "helmetblood")
 
-/obj/item/clothing/head/update_clothes_damaged_state(damaging = TRUE)
+/obj/item/clothing/head/update_clothes_damaged_state()
 	..()
 	if(ismob(loc))
 		var/mob/M = loc

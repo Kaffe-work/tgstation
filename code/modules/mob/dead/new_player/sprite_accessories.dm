@@ -288,10 +288,6 @@
 	icon_state = "hair_dreads"
 
 /datum/sprite_accessory/hair/drillhair
-	name = "Drill Hair"
-	icon_state = "hair_drillhair"
-
-/datum/sprite_accessory/hair/drillhair
 	name = "Drillruru"
 	icon_state = "hair_drillruru"
 
@@ -347,7 +343,7 @@
 	name = "Flat Top (Big)"
 	icon_state = "hair_bigflattop"
 
-/datum/sprite_accessory/hair/fag
+/datum/sprite_accessory/hair/flow_hair
 	name = "Flow Hair"
 	icon_state = "hair_f"
 
@@ -475,7 +471,7 @@
 	name = "Mohawk (Shaved)"
 	icon_state = "hair_shavedmohawk"
 
-/datum/sprite_accessory/hair/shavedmohawk
+/datum/sprite_accessory/hair/unshavenmohawk
 	name = "Mohawk (Unshaven)"
 	icon_state = "hair_unshaven_mohawk"
 
@@ -1532,6 +1528,10 @@
 	name = "Thigh-high (Bee)"
 	icon_state = "bee_thigh"
 
+/datum/sprite_accessory/socks/thocks
+	name = "Thocks"
+	icon_state = "thocks"
+
 //////////.//////////////////
 // MutantParts Definitions //
 /////////////////////////////
@@ -1715,6 +1715,23 @@
 	center = TRUE
 	dimension_y = 32
 
+/datum/sprite_accessory/wings/megamoth
+	name = "Megamoth"
+	icon_state = "megamoth"
+	color_src = 0
+	dimension_x = 96
+	center = TRUE
+	dimension_y = 32
+	locked = TRUE
+
+/datum/sprite_accessory/wings_open/megamoth
+	name = "Megamoth"
+	icon_state = "megamoth"
+	color_src = 0
+	dimension_x = 96
+	center = TRUE
+	dimension_y = 32
+
 /datum/sprite_accessory/frills
 	icon = 'icons/mob/mutant_bodyparts.dmi'
 
@@ -1874,6 +1891,18 @@
 	name = "Snow"
 	icon_state = "snow"
 
+/datum/sprite_accessory/moth_wings/oakworm
+	name = "Oak Worm"
+	icon_state = "oakworm"
+
+/datum/sprite_accessory/moth_wings/jungle
+	name = "Jungle"
+	icon_state = "jungle"
+
+/datum/sprite_accessory/moth_wings/witchwing
+	name = "Witch Wing"
+	icon_state = "witchwing"
+
 /datum/sprite_accessory/moth_markings // the markings that moths can have. finally something other than the boring tan
 	icon = 'icons/mob/moth_markings.dmi'
 	color_src = null
@@ -1925,3 +1954,15 @@
 /datum/sprite_accessory/moth_markings/moonfly
 	name = "Moon Fly"
 	icon_state = "moonfly"
+
+/datum/sprite_accessory/moth_markings/oakworm
+	name = "Oak Worm"
+	icon_state = "oakworm"
+
+/datum/sprite_accessory/moth_markings/jungle
+	name = "Jungle"
+	icon_state = "jungle"
+
+/datum/sprite_accessory/moth_markings/witchwing
+	name = "Witch Wing"
+	icon_state = "witchwing"

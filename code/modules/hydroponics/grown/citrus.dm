@@ -33,27 +33,6 @@
 	filling_color = "#00FF00"
 	juice_results = list(/datum/reagent/consumable/limejuice = 0)
 
-// Electric Lime
-/obj/item/seeds/lime/electric
-	name = "pack of electric lime seeds"
-	desc = "Electrically sour seeds."
-	icon_state = "seed-electriclime"
-	species = "electric lime"
-	plantname = "Electric Lime Tree"
-	growing_icon = 'icons/obj/hydroponics/growing_fruits.dmi'
-	icon_grow = "lime-grow"
-	icon_dead = "lime-dead"
-	icon_harvest = "lime-harvest"
-	product = /obj/item/reagent_containers/food/snacks/grown/citrus/lime/electric
-	genes = list(/datum/plant_gene/trait/repeated_harvest, /datum/plant_gene/trait/cell_charge, /datum/plant_gene/trait/glow/green)
-
-/obj/item/reagent_containers/food/snacks/grown/citrus/lime/electric
-	seed = /obj/item/seeds/lime/electric
-	name = "electric lime"
-	desc = "It's so sour, you'll be shocked!"
-	icon_state = "electriclime"
-
-
 // Orange
 /obj/item/seeds/orange
 	name = "pack of orange seeds"
@@ -156,7 +135,7 @@
 /obj/item/reagent_containers/food/snacks/grown/firelemon/ex_act(severity)
 	qdel(src) //Ensuring that it's deleted by its own explosion
 
-/obj/item/reagent_containers/food/snacks/grown/firelemon/proc/prime()
+/obj/item/reagent_containers/food/snacks/grown/firelemon/proc/prime(mob/living/lanced_by)
 	switch(seed.potency) //Combustible lemons are alot like IEDs, lots of flame, very little bang.
 		if(0 to 30)
 			update_mob()
@@ -191,6 +170,7 @@
 	endurance = 50
 	yield = 5
 	potency = 20
+	instability = 64
 	growing_icon = 'icons/obj/hydroponics/growing_fruits.dmi'
 	icon_grow = "lime-grow"
 	icon_dead = "lime-dead"

@@ -80,7 +80,7 @@
 	SEND_SIGNAL(I, COMSIG_ITEM_ATTACK_ZONE, src, user, affecting)
 	send_item_attack_message(I, user, affecting.name)
 	if(I.force)
-		apply_damage(I.force, I.damtype, affecting)
+		apply_damage(I.force, I.damtype, affecting, wound_bonus = I.wound_bonus, bare_wound_bonus = I.bare_wound_bonus, sharpness = I.get_sharpness())
 		if(I.damtype == BRUTE && affecting.status == BODYPART_ORGANIC)
 			if(prob(33))
 				I.add_mob_blood(src)
@@ -128,6 +128,11 @@
 			if(user.a_intent == INTENT_HELP || user.a_intent == INTENT_DISARM)
 				if(S.next_step(user, user.a_intent))
 					return 1
+
+	for(var/datum/wound/W in all_wounds)
+		if(W.try_handling(user))
+			return 1
+
 	return 0
 
 
@@ -164,8 +169,8 @@
 				if(M.powerlevel < 0)
 					M.powerlevel = 0
 
-				visible_message("<span class='danger'>The [M.name] has shocked [src]!</span>", \
-				"<span class='userdanger'>The [M.name] has shocked you!</span>")
+				visible_message("<span class='danger'>The [M.name] shocks [src]!</span>", \
+				"<span class='userdanger'>The [M.name] shocks you!</span>")
 
 				do_sparks(5, TRUE, src)
 				var/power = M.powerlevel + rand(0,3)
@@ -220,13 +225,22 @@
 	. = ..()
 	if(!.)
 		return
-	//Pulling
-	if(iscarbon(pulling) && !(flags & SHOCK_ILLUSION) && source != pulling)
-		var/mob/living/carbon/C = pulling
-		C.electrocute_act(shock_damage*0.75, src, flags)
-	if(iscarbon(pulledby) && !(flags & SHOCK_ILLUSION) && source != pulledby)
-		var/mob/living/carbon/C = pulledby
-		C.electrocute_act(shock_damage*0.75, src, flags)
+	//Propagation through pulling, fireman carry
+	if(!(flags & SHOCK_ILLUSION))
+		var/list/shocking_queue = list()
+		if(iscarbon(pulling) && source != pulling)
+			shocking_queue += pulling
+		if(iscarbon(pulledby) && source != pulledby)
+			shocking_queue += pulledby
+		if(iscarbon(buckled) && source != buckled)
+			shocking_queue += buckled
+		for(var/mob/living/carbon/carried in buckled_mobs)
+			if(source != carried)
+				shocking_queue += carried
+		//Found our victims, now lets shock them all
+		for(var/victim in shocking_queue)
+			var/mob/living/carbon/C = victim
+			C.electrocute_act(shock_damage*0.75, src, 1, flags)
 	//Stun
 	var/should_stun = (!(flags & SHOCK_TESLA) || siemens_coeff > 0.5) && !(flags & SHOCK_NOSTUN)
 	if(should_stun)
@@ -249,6 +263,9 @@
 		to_chat(M, "<span class='warning'>You can't put [p_them()] out with just your bare hands!</span>")
 		return
 
+	if(M == src && check_self_for_injuries())
+		return
+
 	if(!(mobility_flags & MOBILITY_STAND))
 		if(buckled)
 			to_chat(M, "<span class='warning'>You need to unbuckle [src] first to do that!</span>")
@@ -258,7 +275,26 @@
 	else
 		M.visible_message("<span class='notice'>[M] hugs [src] to make [p_them()] feel better!</span>", \
 					"<span class='notice'>You hug [src] to make [p_them()] feel better!</span>")
-		SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "hug", /datum/mood_event/hug)
+
+		// Warm them up with hugs
+		share_bodytemperature(M)
+		if(bodytemperature > M.bodytemperature)
+			SEND_SIGNAL(M, COMSIG_ADD_MOOD_EVENT, "hug", /datum/mood_event/warmhug, src) // Hugger got a warm hug
+			SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "hug", /datum/mood_event/hug) // Reciver always gets a mood for being hugged
+		else
+			SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "hug", /datum/mood_event/warmhug, M) // You got a warm hug
+
+		// Let people know if they hugged someone really warm or really cold
+		if(M.bodytemperature > BODYTEMP_HEAT_DAMAGE_LIMIT)
+			to_chat(src, "<span class='warning'>It feels like [M] is over heating as they hug you.</span>")
+		else if(M.bodytemperature < BODYTEMP_COLD_DAMAGE_LIMIT)
+			to_chat(src, "<span class='warning'>It feels like [M] is freezing as they hug you.</span>")
+
+		if(bodytemperature > BODYTEMP_HEAT_DAMAGE_LIMIT)
+			to_chat(M, "<span class='warning'>It feels like [src] is over heating as you hug them.</span>")
+		else if(bodytemperature < BODYTEMP_COLD_DAMAGE_LIMIT)
+			to_chat(M, "<span class='warning'>It feels like [src] is freezing as you hug them.</span>")
+
 		if(HAS_TRAIT(M, TRAIT_FRIENDLY))
 			var/datum/component/mood/mood = M.GetComponent(/datum/component/mood)
 			if (mood.sanity >= SANITY_GREAT)
@@ -276,6 +312,27 @@
 	set_resting(FALSE)
 
 	playsound(loc, 'sound/weapons/thudswoosh.ogg', 50, TRUE, -1)
+
+/// Check ourselves to see if we've got any shrapnel, return true if we do. This is a much simpler version of what humans do, we only indicate we're checking ourselves if there's actually shrapnel
+/mob/living/carbon/proc/check_self_for_injuries()
+	if(stat == DEAD || stat == UNCONSCIOUS)
+		return
+
+	var/embeds = FALSE
+	for(var/X in bodyparts)
+		var/obj/item/bodypart/LB = X
+		for(var/obj/item/I in LB.embedded_objects)
+			if(!embeds)
+				embeds = TRUE
+				// this way, we only visibly try to examine ourselves if we have something embedded, otherwise we'll still hug ourselves :)
+				visible_message("<span class='notice'>[src] examines [p_them()]self.</span>", \
+					"<span class='notice'>You check yourself for shrapnel.</span>")
+			if(I.isEmbedHarmless())
+				to_chat(src, "\t <a href='?src=[REF(src)];embedded_object=[REF(I)];embedded_limb=[REF(LB)]' class='warning'>There is \a [I] stuck to your [LB.name]!</a>")
+			else
+				to_chat(src, "\t <a href='?src=[REF(src)];embedded_object=[REF(I)];embedded_limb=[REF(LB)]' class='warning'>There is \a [I] embedded in your [LB.name]!</a>")
+
+	return embeds
 
 
 /mob/living/carbon/flash_act(intensity = 1, override_blindness_check = 0, affect_silicon = 0, visual = 0)
@@ -314,7 +371,7 @@
 					become_nearsighted(EYE_DAMAGE)
 
 				else if(prob(eyes.damage - 25))
-					if(!HAS_TRAIT(src, TRAIT_BLIND))
+					if(!is_blind())
 						to_chat(src, "<span class='warning'>You can't see anything!</span>")
 					eyes.applyOrganDamage(eyes.maxHealth)
 
@@ -379,3 +436,29 @@
 	var/obj/item/organ/ears/ears = getorganslot(ORGAN_SLOT_EARS)
 	if(istype(ears) && !ears.deaf)
 		. = TRUE
+
+
+/mob/living/carbon/adjustOxyLoss(amount, updating_health = TRUE, forced = FALSE)
+	. = ..()
+	if(isnull(.))
+		return
+	if(. <= 50)
+		if(getOxyLoss() > 50)
+			ADD_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)
+	else if(getOxyLoss() <= 50)
+		REMOVE_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)
+
+/mob/living/carbon/proc/get_interaction_efficiency(zone)
+	var/obj/item/bodypart/limb = get_bodypart(zone)
+	if(!limb)
+		return
+
+/mob/living/carbon/setOxyLoss(amount, updating_health = TRUE, forced = FALSE)
+	. = ..()
+	if(isnull(.))
+		return
+	if(. <= 50)
+		if(getOxyLoss() > 50)
+			ADD_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)
+	else if(getOxyLoss() <= 50)
+		REMOVE_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)

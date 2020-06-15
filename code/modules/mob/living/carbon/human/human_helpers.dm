@@ -114,6 +114,12 @@
 		if(id_card)
 			return id_card
 
+/mob/living/carbon/human/get_id_in_hand()
+	var/obj/item/held_item = get_active_held_item()
+	if(!held_item)
+		return
+	return held_item.GetID()
+
 /mob/living/carbon/human/IsAdvancedToolUser()
 	if(HAS_TRAIT(src, TRAIT_MONKEYLIKE))
 		return FALSE
@@ -136,7 +142,6 @@
 
 /mob/living/carbon/human/can_use_guns(obj/item/G)
 	. = ..()
-
 	if(G.trigger_guard == TRIGGER_GUARD_NORMAL)
 		if(HAS_TRAIT(src, TRAIT_CHUNKYFINGERS))
 			to_chat(src, "<span class='warning'>Your meaty finger is much too large for the trigger guard!</span>")
@@ -144,7 +149,6 @@
 	if(HAS_TRAIT(src, TRAIT_NOGUNS))
 		to_chat(src, "<span class='warning'>You can't bring yourself to use a ranged weapon!</span>")
 		return FALSE
-	return .
 
 /mob/living/carbon/human/proc/get_bank_account()
 	RETURN_TYPE(/datum/bank_account)
@@ -171,3 +175,22 @@
 		return TRUE
 	if(isclothing(wear_mask) && (wear_mask.clothing_flags & SCAN_REAGENTS))
 		return TRUE
+
+/// For use formatting all of the scars this human has for saving for persistent scarring
+/mob/living/carbon/human/proc/format_scars()
+	if(!all_scars)
+		return
+	var/scars = ""
+	for(var/i in all_scars)
+		var/datum/scar/S = i
+		scars += "[S.format()];"
+	return scars
+
+/// Takes a single scar from the persistent scar loader and recreates it from the saved data
+/mob/living/carbon/human/proc/load_scar(scar_line)
+	var/list/scar_data = splittext(scar_line, "|")
+	if(LAZYLEN(scar_data) != 4)
+		return // invalid, should delete
+	var/obj/item/bodypart/BP = get_bodypart("[scar_data[SCAR_SAVE_ZONE]]")
+	var/datum/scar/S = new
+	return S.load(BP, scar_data[SCAR_SAVE_DESC], scar_data[SCAR_SAVE_PRECISE_LOCATION], text2num(scar_data[SCAR_SAVE_SEVERITY]))

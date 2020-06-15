@@ -28,7 +28,7 @@
 
 /mob/living/simple_animal/parrot
 	name = "parrot"
-	desc = "The parrot squaks, \"It's a Parrot! BAWWK!\"" //'
+	desc = "The parrot squawks, \"It's a Parrot! BAWWK!\"" //'
 	icon = 'icons/mob/animal.dmi'
 	icon_state = "parrot_fly"
 	icon_living = "parrot_fly"
@@ -74,7 +74,7 @@
 
 	var/parrot_speed = 5 //"Delay in world ticks between movement." according to byond. Yeah, that's BS but it does directly affect movement. Higher number = slower.
 	var/parrot_lastmove = null //Updates/Stores position of the parrot while it's moving
-	var/parrot_stuck = 0	//If parrot_lastmove hasnt changed, this will increment until it reaches parrot_stuck_threshold
+	var/parrot_stuck = 0	//If parrot_lastmove hasn't changed, this will increment until it reaches parrot_stuck_threshold
 	var/parrot_stuck_threshold = 10 //if this == parrot_stuck, it'll force the parrot back to wandering
 
 	var/list/speech_buffer = list()
@@ -93,11 +93,10 @@
 	var/obj/parrot_perch = null
 	var/obj/desired_perches = list(/obj/structure/frame/computer, 		/obj/structure/displaycase, \
 									/obj/structure/filingcabinet,		/obj/machinery/teleport, \
-									/obj/machinery/computer,			/obj/machinery/clonepod, \
 									/obj/machinery/dna_scannernew,		/obj/machinery/telecomms, \
 									/obj/machinery/nuclearbomb,			/obj/machinery/particle_accelerator, \
 									/obj/machinery/recharge_station,	/obj/machinery/smartfridge, \
-									/obj/machinery/suit_storage_unit)
+									/obj/machinery/computer,			/obj/machinery/suit_storage_unit)
 
 	//Parrots are kleptomaniacs. This variable ... stores the item a parrot is holding.
 	var/obj/item/held_item = null
@@ -213,8 +212,8 @@
 				ears.forceMove(drop_location())
 				ears = null
 				for(var/possible_phrase in speak)
-					if(copytext(possible_phrase,1,3) in GLOB.department_radio_keys)
-						possible_phrase = copytext(possible_phrase,3)
+					if(copytext_char(possible_phrase, 2, 3) in GLOB.department_radio_keys)
+						possible_phrase = copytext_char(possible_phrase, 3)
 
 	//Adding things to inventory
 	else if(href_list["add_inv"])
@@ -243,7 +242,7 @@
 					ears = headset_to_add
 					to_chat(usr, "<span class='notice'>You fit the headset onto [src].</span>")
 
-					clearlist(available_channels)
+					available_channels.Cut()
 					for(var/ch in headset_to_add.channels)
 						switch(ch)
 							if(RADIO_CHANNEL_ENGINEERING)
@@ -390,11 +389,10 @@
 
 	if(client && stat == CONSCIOUS && parrot_state != icon_living)
 		icon_state = icon_living
-		//Because the most appropriate place to set icon_state is movement_delay(), clearly
 
 //-----SLEEPING
 	if(parrot_state == PARROT_PERCH)
-		if(parrot_perch && parrot_perch.loc != src.loc) //Make sure someone hasnt moved our perch on us
+		if(parrot_perch && parrot_perch.loc != src.loc) //Make sure someone hasn't moved our perch on us
 			if(parrot_perch in view(src))
 				parrot_state = PARROT_SWOOP | PARROT_RETURN
 				icon_state = icon_living
@@ -423,8 +421,8 @@
 						if(prob(50))
 							useradio = 1
 
-						if((copytext(possible_phrase,1,2) in GLOB.department_radio_prefixes) && (copytext(possible_phrase,2,3) in GLOB.department_radio_keys))
-							possible_phrase = "[useradio?pick(available_channels):""][copytext(possible_phrase,3)]" //crop out the channel prefix
+						if((possible_phrase[1] in GLOB.department_radio_prefixes) && (copytext_char(possible_phrase, 2, 3) in GLOB.department_radio_keys))
+							possible_phrase = "[useradio?pick(available_channels):""][copytext_char(possible_phrase, 3)]" //crop out the channel prefix
 						else
 							possible_phrase = "[useradio?pick(available_channels):""][possible_phrase]"
 
@@ -432,8 +430,8 @@
 
 				else //If we have no headset or channels to use, dont try to use any!
 					for(var/possible_phrase in speak)
-						if((copytext(possible_phrase,1,2) in GLOB.department_radio_prefixes) && (copytext(possible_phrase,2,3) in GLOB.department_radio_keys))
-							possible_phrase = copytext(possible_phrase,3) //crop out the channel prefix
+						if((possible_phrase[1] in GLOB.department_radio_prefixes) && (copytext_char(possible_phrase, 2, 3) in GLOB.department_radio_keys))
+							possible_phrase = copytext_char(possible_phrase, 3) //crop out the channel prefix
 						newspeak.Add(possible_phrase)
 				speak = newspeak
 
@@ -471,11 +469,11 @@
 					return
 			return
 
-		if(parrot_interest && parrot_interest in view(src))
+		if(parrot_interest && (parrot_interest in view(src)))
 			parrot_state = PARROT_SWOOP | PARROT_STEAL
 			return
 
-		if(parrot_perch && parrot_perch in view(src))
+		if(parrot_perch && (parrot_perch in view(src)))
 			parrot_state = PARROT_SWOOP | PARROT_RETURN
 			return
 
@@ -519,7 +517,7 @@
 //-----RETURNING TO PERCH
 	else if(parrot_state == (PARROT_SWOOP | PARROT_RETURN))
 		walk(src, 0)
-		if(!parrot_perch || !isturf(parrot_perch.loc)) //Make sure the perch exists and somehow isnt inside of something else.
+		if(!parrot_perch || !isturf(parrot_perch.loc)) //Make sure the perch exists and somehow isn't inside of something else.
 			parrot_perch = null
 			parrot_state = PARROT_WANDER
 			return
@@ -753,7 +751,7 @@
 		return -1
 
 	if(!held_item)
-		if(src == usr) //So that other mobs wont make this message appear when they're bludgeoning you.
+		if(src == usr) //So that other mobs won't make this message appear when they're bludgeoning you.
 			to_chat(src, "<span class='warning'>You have nothing to drop!</span>")
 		return 0
 

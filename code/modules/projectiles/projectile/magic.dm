@@ -1,5 +1,5 @@
 /obj/projectile/magic
-	name = "bolt of nothing"
+	name = "bolt"
 	icon_state = "energy"
 	damage = 0
 	damage_type = OXY
@@ -23,7 +23,7 @@
 			if(L.mob_biotypes & MOB_UNDEAD) //negative energy heals the undead
 				if(L.hellbound && L.stat == DEAD)
 					return BULLET_ACT_BLOCK
-				if(L.revive(full_heal = TRUE, admin_revive = FALSE))
+				if(L.revive(full_heal = TRUE, admin_revive = TRUE))
 					L.grab_ghost(force = TRUE) // even suicides
 					to_chat(L, "<span class='notice'>You rise with a start, you're undead!!!</span>")
 				else if(L.stat != DEAD)
@@ -51,7 +51,7 @@
 		else
 			if(target.hellbound && target.stat == DEAD)
 				return BULLET_ACT_BLOCK
-			if(target.revive(full_heal = TRUE, admin_revive = FALSE))
+			if(target.revive(full_heal = TRUE, admin_revive = TRUE))
 				target.grab_ghost(force = TRUE) // even suicides
 				to_chat(target, "<span class='notice'>You rise with a start, you're alive!!!</span>")
 			else if(target.stat != DEAD)
@@ -158,7 +158,7 @@
 	wabbajack(change)
 	qdel(src)
 
-/proc/wabbajack(mob/living/M)
+/proc/wabbajack(mob/living/M, randomize)
 	if(!istype(M) || M.stat == DEAD || M.notransform || (GODMODE & M.status_flags))
 		return
 
@@ -172,6 +172,9 @@
 
 	if(iscyborg(M))
 		var/mob/living/silicon/robot/Robot = M
+		// Disconnect AI's in shells
+		if(Robot.connected_ai)
+			Robot.connected_ai.disconnect_shell()
 		if(Robot.mmi)
 			qdel(Robot.mmi)
 		Robot.notify_ai(NEW_BORG)
@@ -182,7 +185,8 @@
 
 	var/mob/living/new_mob
 
-	var/randomize = pick("monkey","robot","slime","xeno","humanoid","animal")
+	if(!randomize)
+		randomize = pick("monkey","robot","slime","xeno","humanoid","animal")
 	switch(randomize)
 		if("monkey")
 			new_mob = new /mob/living/carbon/monkey(M.loc)
@@ -276,7 +280,6 @@
 
 	if(!new_mob)
 		return
-	new_mob.grant_language(/datum/language/common)
 
 	// Some forms can still wear some items
 	for(var/obj/item/W in contents)
@@ -626,9 +629,9 @@
 	speed = 0.3
 	flag = "magic"
 
-	var/tesla_power = 20000
-	var/tesla_range = 15
-	var/tesla_flags = TESLA_MOB_DAMAGE | TESLA_MOB_STUN | TESLA_OBJ_DAMAGE
+	var/zap_power = 20000
+	var/zap_range = 15
+	var/zap_flags = ZAP_MOB_DAMAGE | ZAP_MOB_STUN | ZAP_OBJ_DAMAGE
 	var/chain
 	var/mob/living/caster
 
@@ -645,7 +648,7 @@
 			visible_message("<span class='warning'>[src] fizzles on contact with [target]!</span>")
 			qdel(src)
 			return BULLET_ACT_BLOCK
-	tesla_zap(src, tesla_range, tesla_power, tesla_flags)
+	tesla_zap(src, zap_range, zap_power, zap_flags)
 	qdel(src)
 
 /obj/projectile/magic/aoe/lightning/Destroy()
@@ -702,5 +705,8 @@
 	damage_type = BURN
 	nodamage = FALSE
 	armour_penetration = 100
-	temperature = 50
+	temperature = -200 // Cools you down greatly per hit
 	flag = "magic"
+
+/obj/projectile/magic/nothing
+	name = "bolt of nothing"

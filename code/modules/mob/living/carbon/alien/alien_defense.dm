@@ -21,6 +21,8 @@ In all, this is a lot like the monkey code. /N
 	switch(M.a_intent)
 
 		if ("help")
+			if(M == src && check_self_for_injuries())
+				return
 			set_resting(FALSE)
 			AdjustStun(-60)
 			AdjustKnockdown(-60)
@@ -107,6 +109,8 @@ In all, this is a lot like the monkey code. /N
 	if(origin && istype(origin, /datum/spacevine_mutation) && isvineimmune(src))
 		return
 	..()
+	if(QDELETED(src))
+		return
 	switch (severity)
 		if (EXPLODE_DEVASTATE)
 			gib()

@@ -18,7 +18,9 @@
 	return !istype(S, /obj/item/seeds/sample) // Samples can't accept new genes
 
 /datum/plant_gene/proc/Copy()
-	return new type
+	var/datum/plant_gene/G = new type
+	G.mutability_flags = mutability_flags
+	return G
 
 /datum/plant_gene/proc/apply_vars(obj/item/seeds/S) // currently used for fire resist, can prob. be further refactored
 	return
@@ -87,6 +89,12 @@
 /datum/plant_gene/core/potency/apply_stat(obj/item/seeds/S)
 	S.potency = value
 
+/datum/plant_gene/core/instability
+	name = "Stability"
+	value = 10
+
+/datum/plant_gene/core/instability/apply_stat(obj/item/seeds/S)
+	S.instability = value
 
 /datum/plant_gene/core/weed_rate
 	name = "Weed Growth Rate"
@@ -297,9 +305,13 @@
 
 /datum/plant_gene/trait/glow/shadow
 	//makes plant emit slightly purple shadows
+	//adds -potency*(rate*0.2) light power to products
 	name = "Shadow Emission"
 	rate = 0.04
 	glow_color = "#AAD84B"
+
+/datum/plant_gene/trait/glow/shadow/glow_power(obj/item/seeds/S)
+	return -max(S.potency*(rate*0.2), 0.2)
 
 /datum/plant_gene/trait/glow/white
 	name = "White Bioluminescence"
@@ -395,7 +407,7 @@
 
 			// The secret of potato supercells!
 			var/datum/plant_gene/trait/cell_charge/CG = G.seed.get_gene(/datum/plant_gene/trait/cell_charge)
-			if(CG) // Cell charge max is now 40MJ or otherwise known as 400KJ (Same as bluespace powercells)
+			if(CG) // Cell charge max is now 40MJ or otherwise known as 400KJ (Same as bluespace power cells)
 				pocell.maxcharge *= CG.rate*100
 			pocell.charge = pocell.maxcharge
 			pocell.name = "[G.name] battery"
@@ -424,6 +436,7 @@
 			G.reagents.reaction(L, INJECT, fraction)
 			G.reagents.trans_to(L, injecting_amount)
 			to_chat(target, "<span class='danger'>You are pricked by [G]!</span>")
+			log_combat(G, L, "pricked and attempted to inject reagents from [G] to [L]. Last touched by: [G.fingerprintslast].")
 
 /datum/plant_gene/trait/smoke
 	name = "Gaseous Decomposition"

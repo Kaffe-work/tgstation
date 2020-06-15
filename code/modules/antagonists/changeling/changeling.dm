@@ -8,6 +8,8 @@
 	antagpanel_category = "Changeling"
 	job_rank = ROLE_CHANGELING
 	antag_moodlet = /datum/mood_event/focused
+	antag_hud_type = ANTAG_HUD_CHANGELING
+	antag_hud_name = "changeling"
 
 	var/you_are_greet = TRUE
 	var/give_objectives = TRUE
@@ -32,6 +34,8 @@
 	var/isabsorbing = 0
 	var/islinking = 0
 	var/geneticpoints = 10
+	var/total_geneticspoints = 10
+	var/total_chem_storage = 75
 	var/purchasedpowers = list()
 
 	var/mimicing = ""
@@ -88,7 +92,7 @@
 		if(team_mode)
 			forge_team_objectives()
 		forge_objectives()
-	remove_clownmut()
+	owner.current.grant_all_languages(FALSE, FALSE, TRUE)	//Grants omnitongue. We are able to transform our body after all.
 	. = ..()
 
 /datum/antagonist/changeling/on_removal()
@@ -102,19 +106,12 @@
 	remove_changeling_powers()
 	. = ..()
 
-/datum/antagonist/changeling/proc/remove_clownmut()
-	if (owner)
-		var/mob/living/carbon/human/H = owner.current
-		if(istype(H) && owner.assigned_role == "Clown")
-			to_chat(H, "<span class='boldnotice'>You have evolved beyond your clownish nature, allowing you to wield weapons without harming yourself.</span>")
-			H.dna.remove_mutation(CLOWNMUT)
-
 /datum/antagonist/changeling/proc/reset_properties()
 	changeling_speak = 0
 	chosen_sting = null
-	geneticpoints = initial(geneticpoints)
+	geneticpoints = total_geneticspoints
 	sting_range = initial(sting_range)
-	chem_storage = initial(chem_storage)
+	chem_storage = total_chem_storage
 	chem_recharge_rate = initial(chem_recharge_rate)
 	chem_charges = min(chem_charges, chem_storage)
 	chem_recharge_slowdown = initial(chem_recharge_slowdown)
@@ -303,8 +300,11 @@
 			prof.name_list[slot] = I.name
 			prof.appearance_list[slot] = I.appearance
 			prof.flags_cover_list[slot] = I.flags_cover
-			prof.item_state_list[slot] = I.item_state
-			prof.mob_overlay_icon_list[slot] = I.mob_overlay_icon
+			prof.lefthand_file_list[slot] = I.lefthand_file
+			prof.righthand_file_list[slot] = I.righthand_file
+			prof.inhand_icon_state_list[slot] = I.inhand_icon_state
+			prof.worn_icon_list[slot] = I.worn_icon
+			prof.worn_icon_state_list[slot] = I.worn_icon_state
 			prof.exists_list[slot] = 1
 		else
 			continue
@@ -353,7 +353,7 @@
 	if(ishuman(C))
 		add_new_profile(C)
 
-/datum/antagonist/changeling/apply_innate_effects()
+/datum/antagonist/changeling/apply_innate_effects(mob/living/mob_override)
 	//Brains optional.
 	var/mob/living/carbon/C = owner.current
 	if(istype(C))
@@ -362,10 +362,14 @@
 			B.organ_flags &= ~ORGAN_VITAL
 			B.decoy_override = TRUE
 		RegisterSignal(C, list(COMSIG_MOB_MIDDLECLICKON, COMSIG_MOB_ALTCLICKON), .proc/stingAtom)
-	update_changeling_icons_added()
+	var/mob/living/M = mob_override || owner.current
+	add_antag_hud(antag_hud_type, antag_hud_name, M)
+	handle_clown_mutation(M, "You have evolved beyond your clownish nature, allowing you to wield weapons without harming yourself.")
 
-/datum/antagonist/changeling/remove_innate_effects()
-	update_changeling_icons_removed()
+/datum/antagonist/changeling/remove_innate_effects(mob/living/mob_override)
+	var/mob/living/M = mob_override || owner.current
+	remove_antag_hud(antag_hud_type, M)
+	handle_clown_mutation(M, removing = FALSE)
 	UnregisterSignal(owner.current, list(COMSIG_MOB_MIDDLECLICKON, COMSIG_MOB_ALTCLICKON))
 
 
@@ -478,15 +482,6 @@
 			objectives += identity_theft
 		escape_objective_possible = FALSE
 
-/datum/antagonist/changeling/proc/update_changeling_icons_added()
-	var/datum/atom_hud/antag/hud = GLOB.huds[ANTAG_HUD_CHANGELING]
-	hud.join_hud(owner.current)
-	set_antag_hud(owner.current, "changeling")
-
-/datum/antagonist/changeling/proc/update_changeling_icons_removed()
-	var/datum/atom_hud/antag/hud = GLOB.huds[ANTAG_HUD_CHANGELING]
-	hud.leave_hud(owner.current)
-	set_antag_hud(owner.current, null)
 
 /datum/antagonist/changeling/admin_add(datum/mind/new_owner,mob/admin)
 	. = ..()
@@ -519,8 +514,11 @@
 	var/list/appearance_list = list()
 	var/list/flags_cover_list = list()
 	var/list/exists_list = list()
-	var/list/item_state_list = list()
-	var/list/mob_overlay_icon_list = list()
+	var/list/lefthand_file_list = list()
+	var/list/righthand_file_list = list()
+	var/list/inhand_icon_state_list = list()
+	var/list/worn_icon_list = list()
+	var/list/worn_icon_state_list = list()
 
 	var/underwear
 	var/undershirt
@@ -539,11 +537,14 @@
 	newprofile.appearance_list = appearance_list.Copy()
 	newprofile.flags_cover_list = flags_cover_list.Copy()
 	newprofile.exists_list = exists_list.Copy()
-	newprofile.item_state_list = item_state_list.Copy()
+	newprofile.lefthand_file_list = lefthand_file_list.Copy()
+	newprofile.righthand_file_list = righthand_file_list.Copy()
+	newprofile.inhand_icon_state_list = inhand_icon_state_list.Copy()
 	newprofile.underwear = underwear
 	newprofile.undershirt = undershirt
 	newprofile.socks = socks
-	newprofile.mob_overlay_icon_list = mob_overlay_icon_list.Copy()
+	newprofile.worn_icon_list = worn_icon_list.Copy()
+	newprofile.worn_icon_state_list = worn_icon_state_list.Copy()
 
 
 /datum/antagonist/changeling/xenobio

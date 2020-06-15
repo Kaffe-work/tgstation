@@ -3,7 +3,7 @@
 	desc = "A chemical patch for touch based applications."
 	icon = 'icons/obj/chemical.dmi'
 	icon_state = "bandaid"
-	item_state = "bandaid"
+	inhand_icon_state = "bandaid"
 	possible_transfer_amounts = list()
 	volume = 40
 	apply_type = PATCH
@@ -41,6 +41,6 @@
 
 /obj/item/reagent_containers/pill/patch/instabitaluri
 	name = "instabitaluri patch"
-	desc = "Helps with brute and burn injuries."
+	desc = "Helps with brute and burn injuries. Slightly toxic."
 	list_reagents = list(/datum/reagent/medicine/C2/instabitaluri = 20)
 	icon_state = "bandaid_both"

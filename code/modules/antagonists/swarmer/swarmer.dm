@@ -18,6 +18,7 @@
 	mob_name = "a swarmer"
 	death = FALSE
 	roundstart = FALSE
+	short_desc = "You are a swarmer, a weapon of a long dead civilization."
 	flavour_text = {"
 	<b>You are a swarmer, a weapon of a long dead civilization. Until further orders from your original masters are received, you must continue to consume and replicate.</b>
 	<b>Clicking on any object will try to consume it, either deconstructing it into its components, destroying it, or integrating any materials it has into you if successful.</b>
@@ -137,12 +138,12 @@
 	else
 		death()
 
-/mob/living/simple_animal/hostile/swarmer/CanPass(atom/movable/O)
+/mob/living/simple_animal/hostile/swarmer/CanAllowThrough(atom/movable/O)
+	. = ..()
 	if(istype(O, /obj/projectile/beam/disabler))//Allows for swarmers to fight as a group without wasting their shots hitting each other
-		return 1
+		return TRUE
 	if(isswarmer(O))
-		return 1
-	..()
+		return TRUE
 
 ////CTRL CLICK FOR SWARMERS AND SWARMER_ACT()'S////
 /mob/living/simple_animal/hostile/swarmer/AttackingTarget()
@@ -191,8 +192,9 @@
 	return 0
 
 /obj/item/IntegrateAmount() //returns the amount of resources gained when eating this item
-	if(custom_materials[getmaterialref(/datum/material/iron)] || custom_materials[getmaterialref(/datum/material/glass)])
-		return 1
+	if(custom_materials)
+		if(custom_materials[SSmaterials.GetMaterialRef(/datum/material/iron)] || custom_materials[SSmaterials.GetMaterialRef(/datum/material/glass)])
+			return 1
 	return ..()
 
 /obj/item/gun/swarmer_act()//Stops you from eating the entire armory
@@ -257,7 +259,8 @@
 
 /obj/machinery/camera/swarmer_act(mob/living/simple_animal/hostile/swarmer/S)
 	S.DisIntegrate(src)
-	toggle_cam(S, 0)
+	if(!QDELETED(S)) //If it got blown up no need to turn it off.
+		toggle_cam(S, 0)
 	return TRUE
 
 /obj/machinery/particle_accelerator/control_box/swarmer_act(mob/living/simple_animal/hostile/swarmer/S)
@@ -413,7 +416,7 @@
 		resources -= fabrication_cost
 	else
 		to_chat(src, "<span class='warning'>You do not have the necessary resources to fabricate this object.</span>")
-		return 0
+		return
 	return new fabrication_object(loc)
 
 /mob/living/simple_animal/hostile/swarmer/proc/Integrate(atom/movable/target)
@@ -445,8 +448,7 @@
 	new /obj/effect/temp_visual/swarmer/disintegration(get_turf(target))
 	do_attack_animation(target)
 	changeNext_move(CLICK_CD_MELEE)
-	target.ex_act(EXPLODE_LIGHT)
-
+	SSexplosions.lowobj += target
 
 /mob/living/simple_animal/hostile/swarmer/proc/DisperseTarget(mob/living/target)
 	if(target == src)
@@ -573,7 +575,7 @@
 		var/mob/living/L = AM
 		if(!istype(L, /mob/living/simple_animal/hostile/swarmer))
 			playsound(loc,'sound/effects/snap.ogg',50, TRUE, -1)
-			L.electrocute_act(0, src, 1, flags = SHOCK_NOGLOVES|SHOCK_ILLUSION)
+			L.electrocute_act(10, src, 1, flags = SHOCK_NOGLOVES|SHOCK_ILLUSION)
 			if(iscyborg(L))
 				L.Paralyze(100)
 			qdel(src)
@@ -609,12 +611,14 @@
 	icon_state = "barricade"
 	light_range = MINIMUM_USEFUL_LIGHT_RANGE
 	max_integrity = 50
+	density = TRUE
 
-/obj/structure/swarmer/blockade/CanPass(atom/movable/O)
+/obj/structure/swarmer/blockade/CanAllowThrough(atom/movable/O)
+	. = ..()
 	if(isswarmer(O))
-		return 1
+		return TRUE
 	if(istype(O, /obj/projectile/beam/disabler))
-		return 1
+		return TRUE
 
 /mob/living/simple_animal/hostile/swarmer/proc/CreateSwarmer()
 	set name = "Replicate"

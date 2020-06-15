@@ -24,8 +24,8 @@
 	use_power = IDLE_POWER_USE				//this turret uses and requires power
 	idle_power_usage = 50		//when inactive, this turret takes up constant 50 Equipment power
 	active_power_usage = 300	//when active, this turret takes up constant 300 Equipment power
-	req_access = list(ACCESS_SEC_DOORS)
-	power_channel = EQUIP	//drains power from the EQUIPMENT channel
+	req_access = list(ACCESS_SECURITY) /// Only people with Security access
+	power_channel = AREA_USAGE_EQUIP	//drains power from the EQUIPMENT channel
 
 	var/base_icon_state = "standard"
 	var/scan_range = 7
@@ -63,7 +63,7 @@
 
 
 	var/turret_flags = TURRET_FLAG_SHOOT_CRIMINALS | TURRET_FLAG_SHOOT_ANOMALOUS
-	
+
 	var/on = TRUE				//determines if the turret is on
 
 	var/list/faction = list("turret" ) // Same faction mobs will never be shot at, no matter the other settings
@@ -99,12 +99,30 @@
 	if(!has_cover)
 		INVOKE_ASYNC(src, .proc/popUp)
 
-/obj/machinery/porta_turret/update_icon()
-	cut_overlays()
+/obj/machinery/porta_turret/proc/toggle_on(var/set_to)
+	var/current = on
+	if (!isnull(set_to))
+		on = set_to
+	else
+		on = !on
+	if (current != on)
+		check_should_process()
+		if (!on)
+			popDown()
+
+/obj/machinery/porta_turret/proc/check_should_process()
+	if (datum_flags & DF_ISPROCESSING)
+		if (!on || !anchored || (machine_stat & BROKEN) || !powered())
+			end_processing()
+	else
+		if (on && anchored && !(machine_stat & BROKEN) && powered())
+			begin_processing()
+
+/obj/machinery/porta_turret/update_icon_state()
 	if(!anchored)
 		icon_state = "turretCover"
 		return
-	if(stat & BROKEN)
+	if(machine_stat & BROKEN)
 		icon_state = "[base_icon_state]_broken"
 	else
 		if(powered())
@@ -118,7 +136,6 @@
 				icon_state = "[base_icon_state]_off"
 		else
 			icon_state = "[base_icon_state]_unpowered"
-
 
 /obj/machinery/porta_turret/proc/setup(obj/item/gun/turret_gun)
 	if(stored_gun)
@@ -162,8 +179,8 @@
 
 /obj/machinery/porta_turret/ui_interact(mob/user)
 	. = ..()
-	var/dat
-	dat += "Status: <a href='?src=[REF(src)];power=1'>[on ? "On" : "Off"]</a><br>"
+
+	var/list/dat = list("Status: <a href='?src=[REF(src)];power=1'>[on ? "On" : "Off"]</a><br>")
 	dat += "Behaviour controls are [locked ? "locked" : "unlocked"]<br>"
 
 	if(!locked)
@@ -184,7 +201,7 @@
 
 
 	var/datum/browser/popup = new(user, "autosec", "Automatic Portable Turret Installation", 300, 300)
-	popup.set_content(dat)
+	popup.set_content(dat.Join(""))
 	popup.open()
 
 /obj/machinery/porta_turret/Topic(href, href_list)
@@ -195,7 +212,7 @@
 
 	if(href_list["power"] && !locked)
 		if(anchored)	//you can't turn a turret on/off if it's not anchored/secured
-			on = !on	//toggle on/off
+			toggle_on()
 		else
 			to_chat(usr, "<span class='warning'>It has to be secured first!</span>")
 		interact(usr)
@@ -225,12 +242,15 @@
 
 /obj/machinery/porta_turret/power_change()
 	. = ..()
-	if(!anchored || (stat & BROKEN) || !powered())
+	if(!anchored || (machine_stat & BROKEN) || !powered())
 		update_icon()
 		remove_control()
+	check_should_process()
+
+
 
 /obj/machinery/porta_turret/attackby(obj/item/I, mob/user, params)
-	if(stat & BROKEN)
+	if(machine_stat & BROKEN)
 		if(I.tool_behaviour == TOOL_CROWBAR)
 			//If the turret is destroyed, you can remove it with a crowbar to
 			//try and salvage its components
@@ -292,10 +312,11 @@
 	audible_message("<span class='hear'>[src] hums oddly...</span>")
 	obj_flags |= EMAGGED
 	controllock = TRUE
-	on = FALSE //turns off the turret temporarily
+	toggle_on(FALSE) //turns off the turret temporarily
 	update_icon()
-	sleep(60) //6 seconds for the traitor to gtfo of the area before the turret decides to ruin his shit
-	on = TRUE //turns it back on. The cover popUp() popDown() are automatically called in process(), no need to define it here
+	//6 seconds for the traitor to gtfo of the area before the turret decides to ruin his shit
+	addtimer(CALLBACK(src, .proc/toggle_on, TRUE), 6 SECONDS)
+	//turns it back on. The cover popUp() popDown() are automatically called in process(), no need to define it here
 
 
 /obj/machinery/porta_turret/emp_act(severity)
@@ -312,10 +333,10 @@
 		if(prob(20))
 			turret_flags |= TURRET_FLAG_SHOOT_ALL // Shooting everyone is a pretty big deal, so it's least likely to get turned on
 
-		on = FALSE
+		toggle_on(FALSE)
 		remove_control()
 
-		addtimer(VARSET_CALLBACK(src, on, TRUE), rand(60,600))
+		addtimer(CALLBACK(src, .proc/toggle_on, TRUE), rand(60,600))
 
 /obj/machinery/porta_turret/take_damage(damage, damage_type = BRUTE, damage_flag = 0, sound_effect = 1)
 	. = ..()
@@ -345,15 +366,15 @@
 /obj/machinery/porta_turret/process()
 	//the main machinery process
 	if(cover == null && anchored)	//if it has no cover and is anchored
-		if(stat & BROKEN)	//if the turret is borked
+		if(machine_stat & BROKEN)	//if the turret is borked
 			qdel(cover)	//delete its cover, assuming it has one. Workaround for a pesky little bug
 		else
 			if(has_cover)
 				cover = new /obj/machinery/porta_turret_cover(loc)	//if the turret has no cover and is anchored, give it a cover
 				cover.parent_turret = src	//assign the cover its parent_turret, which would be this (src)
 
-	if(!on || (stat & (NOPOWER|BROKEN)) || manual_control)
-		return
+	if(!on || (machine_stat & (NOPOWER|BROKEN)) || manual_control)
+		return PROCESS_KILL
 
 	var/list/targets = list()
 	for(var/mob/A in view(scan_range, base))
@@ -386,7 +407,7 @@
 				if(LAZYLEN(faction) && (ROLE_SYNDICATE in faction) && sillyconerobot.emagged == TRUE)
 					continue
 
-		if(iscarbon(A))
+		else if(iscarbon(A))
 			var/mob/living/carbon/C = A
 			//If not emagged, only target carbons that can use items
 			if(mode != TURRET_LETHAL && (C.stat || C.handcuffed || !(C.mobility_flags & MOBILITY_USE)))
@@ -404,6 +425,7 @@
 			else if(turret_flags & TURRET_FLAG_SHOOT_ANOMALOUS) //non humans who are not simple animals (xenos etc)
 				if(!in_faction(C))
 					targets += C
+
 	for(var/A in GLOB.mechas_list)
 		if((get_dist(A, base) < scan_range) && can_see(base, A, scan_range))
 			var/obj/mecha/Mech = A
@@ -433,7 +455,7 @@
 		return
 	if(raising || raised)
 		return
-	if(stat & BROKEN)
+	if(machine_stat & BROKEN)
 		return
 	invisibility = 0
 	raising = 1
@@ -449,7 +471,7 @@
 /obj/machinery/porta_turret/proc/popDown()	//pops the turret down
 	if(raising || !raised)
 		return
-	if(stat & BROKEN)
+	if(machine_stat & BROKEN)
 		return
 	layer = OBJ_LAYER
 	raising = 1
@@ -497,7 +519,7 @@
 	// If we aren't shooting heads then return a threatcount of 0
 	if (!(turret_flags & TURRET_FLAG_SHOOT_HEADS) && (perp.get_assignment() in GLOB.command_positions))
 		return 0
-	
+
 	return threatcount
 
 /obj/machinery/porta_turret/proc/in_faction(mob/target)
@@ -567,9 +589,7 @@
 		return
 
 	shoot_cyborgs ? (turret_flags |= TURRET_FLAG_SHOOT_BORGS) : (turret_flags &= ~TURRET_FLAG_SHOOT_BORGS)
-	src.on = on
-	if(!on)
-		popDown()
+	toggle_on(on)
 	src.mode = mode
 	power_change()
 
@@ -830,12 +850,12 @@
 
 /obj/machinery/turretid/examine(mob/user)
 	. += ..()
-	if(issilicon(user) && (!stat & BROKEN))
+	if(issilicon(user) && !(machine_stat & BROKEN))
 		. += {"<span class='notice'>Ctrl-click [src] to [ enabled ? "disable" : "enable"] turrets.</span>
 					<span class='notice'>Alt-click [src] to set turrets to [ lethal ? "stun" : "kill"].</span>"}
 
 /obj/machinery/turretid/attackby(obj/item/I, mob/user, params)
-	if(stat & BROKEN)
+	if(machine_stat & BROKEN)
 		return
 
 	if(I.tool_behaviour == TOOL_MULTITOOL)
@@ -943,9 +963,8 @@
 		aTurret.setState(enabled, lethal, shoot_cyborgs)
 	update_icon()
 
-/obj/machinery/turretid/update_icon()
-	..()
-	if(stat & NOPOWER)
+/obj/machinery/turretid/update_icon_state()
+	if(machine_stat & NOPOWER)
 		icon_state = "control_off"
 	else if (enabled)
 		if (lethal)
@@ -1076,9 +1095,9 @@
 	if(on)
 		if(team_color == "blue")
 			if(istype(P, /obj/projectile/beam/lasertag/redtag))
-				on = FALSE
-				addtimer(VARSET_CALLBACK(src, on, TRUE), 10 SECONDS)
+				toggle_on(FALSE)
+				addtimer(CALLBACK(src, .proc/toggle_on, TRUE), 10 SECONDS)
 		else if(team_color == "red")
 			if(istype(P, /obj/projectile/beam/lasertag/bluetag))
-				on = FALSE
-				addtimer(VARSET_CALLBACK(src, on, TRUE), 10 SECONDS)
+				toggle_on(FALSE)
+				addtimer(CALLBACK(src, .proc/toggle_on, TRUE), 10 SECONDS)

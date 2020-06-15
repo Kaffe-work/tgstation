@@ -8,7 +8,7 @@
 	icon = 'icons/obj/device.dmi'
 	icon_state = "forensicnew"
 	w_class = WEIGHT_CLASS_SMALL
-	item_state = "electronic"
+	inhand_icon_state = "electronic"
 	lefthand_file = 'icons/mob/inhands/misc/devices_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/misc/devices_righthand.dmi'
 	flags_1 = CONDUCT_1
@@ -138,7 +138,7 @@
 			add_log("<span class='info'><B>Blood:</B></span>")
 			found_something = 1
 			for(var/B in blood)
-				add_log("Type: <font color='red'>[blood[B]]</font> DNA: <font color='red'>[B]</font>")
+				add_log("Type: <font color='red'>[blood[B]]</font> DNA (UE): <font color='red'>[B]</font>")
 
 		//Fibers
 		if(length(fibers))
