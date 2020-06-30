@@ -1517,6 +1517,8 @@
 #include "code\modules\antagonists\survivalist\survivalist.dm"
 #include "code\modules\antagonists\swarmer\swarmer.dm"
 #include "code\modules\antagonists\swarmer\swarmer_event.dm"
+#include "code\modules\antagonists\terminator\datum_terminator.dm"
+#include "code\modules\antagonists\terminator\hardware_integrater.dm"
 #include "code\modules\antagonists\traitor\datum_traitor.dm"
 #include "code\modules\antagonists\traitor\syndicate_contract.dm"
 #include "code\modules\antagonists\traitor\equipment\contractor.dm"
