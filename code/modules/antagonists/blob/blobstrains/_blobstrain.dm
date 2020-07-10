@@ -15,6 +15,7 @@ GLOBAL_LIST_INIT(valid_blobstrains, subtypesof(/datum/blobstrain) - list(/datum/
 	var/core_regen = 2
 	var/resource_delay = 0
 	var/point_rate = 2
+	var/maxtemperature
 	var/mob/camera/blob/overmind
 
 /datum/blobstrain/New(mob/camera/blob/new_overmind)

@@ -9,6 +9,7 @@
 	color = "#B68D00"
 	complementary_color = "#BE5532"
 	blobbernaut_message = "splashes"
+	maxbodytemp = INFINITY
 	message = "The blob splashes you with burning oil"
 	message_living = ", and you feel your skin char and melt"
 	reagent = /datum/reagent/blob/blazing_oil
