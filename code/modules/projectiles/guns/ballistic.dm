@@ -446,7 +446,7 @@ GLOBAL_LIST_INIT(gun_saw_types, typecacheof(list(
 	/obj/item/melee/transforming/energy,
 	)))
 
-///Handles all the logic of sawing off guns,
+///Handles all the logic of sawing off guns, but whoever that wrote this garbage should be sent ot the fucking gulag
 /obj/item/gun/ballistic/proc/sawoff(mob/user, obj/item/saw)
 	if(!saw.get_sharpness() || !is_type_in_typecache(saw, GLOB.gun_saw_types) && !saw.tool_behaviour == TOOL_SAW) //needs to be sharp. Otherwise turned off eswords can cut this.
 		return
@@ -455,6 +455,9 @@ GLOBAL_LIST_INIT(gun_saw_types, typecacheof(list(
 		return
 	if(bayonet)
 		to_chat(user, "<span class='warning'>You cannot saw-off \the [src] with \the [bayonet] attached!</span>")
+		return
+	if!(obj/item/saw == TOOL_SAW)
+		to_chat(user, "<span class='warning'>You cannot saw-off \the [src] without a saw")
 		return
 	user.changeNext_move(CLICK_CD_MELEE)
 	user.visible_message("<span class='notice'>[user] begins to shorten \the [src].</span>", "<span class='notice'>You begin to shorten \the [src]...</span>")
